@@ -21,19 +21,13 @@ public class InMemoryBoardRepository implements BoardRepository {
 
     @Override
     public Board save(Board board) {
-        // TODO LAB-04: decide and document the semantics of save/replace.
         boards.put(board.id(), board);
         return board;
     }
 
     @Override
     public Optional<Board> findById(String boardId) {
-        // TODO LAB-04: validate whether defensive copying is necessary with the current immutable model.
         return Optional.ofNullable(boards.get(boardId));
     }
 
-    @Override
-    public boolean existsById(String boardId) {
-        return boards.containsKey(boardId);
-    }
 }

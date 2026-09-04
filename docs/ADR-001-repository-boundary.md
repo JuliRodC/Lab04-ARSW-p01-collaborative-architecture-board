@@ -22,10 +22,14 @@ Se descartó existsById porque ningún caso de uso lo necesita por separado, fin
 InMemoryBoardRepository implementa esta interfaz, y BoardApplicationService depende solo de BoardRepository, inyectada por constructor.
 
 ## Positive consequences
-TODO
+
+- Si más adelante cambian el almacenamiento en memoria por una base de datos real, no hay que tocar el service ni el controlador, solo crear otro adaptador que implemente BoardRepository.
+- El BoardApplicationService se puede probar sin necesitar la implementación real del repositorio.
+- No hace falta hacer copias defensivas en findById, porque Board y su lista de elementos ya son inmutables por diseño.
 
 ## Trade-off
-TODO
+
+Se agrega una interfaz de por medio para un caso que solo tiene una implementación. Es un poco más de código para algo tan simple, pero se acepta ese costo porque mantiene el dominio y la aplicación separados de cómo se guardan los datos realmente.
 
 ## Evidence / validation
 TODO
