@@ -4,6 +4,8 @@ import edu.eci.arsw.collabboard.application.port.out.BoardRepository;
 import edu.eci.arsw.collabboard.domain.model.Board;
 import edu.eci.arsw.collabboard.domain.model.BoardElement;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
+import edu.eci.arsw.collabboard.application.exception.BoardNotFoundException;
 
 import java.util.List;
 
@@ -17,17 +19,21 @@ public class BoardApplicationService {
     }
 
     public Board createBoard(String name) {
-        // TODO LAB-04: generate the id, enforce the use-case rules and persist through the port.
-        throw new UnsupportedOperationException("TODO LAB-04: createBoard");
+        String id = UUID.randomUUID().toString();
+        Board board = new Board(id, name, List.of());
+        return repository.save(board);
     }
 
     public Board getBoard(String boardId) {
-        // TODO LAB-04: use a concrete application exception when the board does not exist.
-        throw new UnsupportedOperationException("TODO LAB-04: getBoard");
+        return repository.findById(boardId)
+                .orElseThrow(() -> new BoardNotFoundException(boardId));
     }
 
     public Board replaceBoard(String boardId, String name, List<BoardElement> elements) {
-        // TODO LAB-04: keep the existing identity and replace only a board that already exists.
-        throw new UnsupportedOperationException("TODO LAB-04: replaceBoard");
+        repository.findById(boardId)
+                .orElseThrow(() -> new BoardNotFoundException(boardId));
+
+        Board updated = new Board(boardId, name, elements);
+        return repository.save(updated);
     }
 }
