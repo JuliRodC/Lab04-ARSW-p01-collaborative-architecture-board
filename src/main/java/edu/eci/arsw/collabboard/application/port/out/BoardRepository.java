@@ -15,6 +15,4 @@ public interface BoardRepository {
     Board save(Board board);
 
     Optional<Board> findById(String boardId);
-
-    boolean existsById(String boardId);
 }
