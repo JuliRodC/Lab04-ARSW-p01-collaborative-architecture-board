@@ -4,6 +4,7 @@ import edu.eci.arsw.collabboard.application.exception.BoardNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,6 +31,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> invalidDomainInput(IllegalArgumentException ex, HttpServletRequest request) {
         return error(HttpStatus.BAD_REQUEST, "INVALID_INPUT", ex.getMessage(), request.getRequestURI());
+    }
+
+    /*
+     * BoardElement valida sus propios invariantes (ej. width/height negativos) en su
+     * compact constructor. Cuando Jackson deserializa el body del PUT y ese
+     * constructor lanza IllegalArgumentException, Jackson lo envuelve en una
+     * excepción de parseo (no llega como IllegalArgumentException "plano" al
+     * handler de arriba). Sin este manejador, esos casos caerían en la página de
+     * error por defecto de Spring en vez del contrato ApiError. Se desenvuelve la
+     * causa más específica para mantener el mismo código/mensaje documentados en
+     * api-contract.md.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> malformedRequestBody(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        Throwable cause = ex.getMostSpecificCause();
+        if (cause instanceof IllegalArgumentException) {
+            return error(HttpStatus.BAD_REQUEST, "INVALID_INPUT", cause.getMessage(), request.getRequestURI());
+        }
+        return error(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "Malformed request body", request.getRequestURI());
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)

@@ -25,7 +25,6 @@ public class BoardRestController {
 
     @PostMapping
     public ResponseEntity<Board> create(@Valid @RequestBody CreateBoardRequest request) {
-        // TODO LAB-04: keep the controller thin; coordinate the HTTP response only.
         Board created = service.createBoard(request.name());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
