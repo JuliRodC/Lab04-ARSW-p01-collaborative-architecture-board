@@ -32,4 +32,4 @@ InMemoryBoardRepository implementa esta interfaz, y BoardApplicationService depe
 Se agrega una interfaz de por medio para un caso que solo tiene una implementación. Es un poco más de código para algo tan simple, pero se acepta ese costo porque mantiene el dominio y la aplicación separados de cómo se guardan los datos realmente.
 
 ## Evidence / validation
-TODO
+La interfaz `BoardRepository` se valida indirectamente: `BoardApplicationServiceTest` ejercita `BoardApplicationService` usando `InMemoryBoardRepository` como unica implementacion disponible (crear/leer, reemplazar, y los casos donde el Board no existe), sin que el service conozca detalles de almacenamiento. `BoardRestControllerTest` confirma que ese mismo comportamiento se propaga correctamente hasta la capa HTTP (200/201/404) sin acoplar el controlador a la implementacion del repositorio, cumpliendo lo que dice esta decision.
