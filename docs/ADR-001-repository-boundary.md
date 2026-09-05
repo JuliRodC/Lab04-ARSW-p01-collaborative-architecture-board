@@ -1,7 +1,7 @@
 # ADR-001 — Repository Boundary
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 

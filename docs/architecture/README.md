@@ -1,6 +1,6 @@
 # Architecture Evidence — Lab 04
 
-1. **ArchiMate Application View** — *pendiente* (ver `docs/architecture/`, siguiente paso: hacerla en Archi u otra herramienta de modelado)
+1. **ArchiMate Application View** — ver `archimate-application-view.png` (imagen) y `lab4-application-view.archimate` (modelo editable, hecho en Archi), en esta misma carpeta.
    - REST interface
    - Board application service
    - repository port / persistence adapter

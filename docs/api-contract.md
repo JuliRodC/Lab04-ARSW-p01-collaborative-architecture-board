@@ -23,5 +23,3 @@ Complete this file with the **actual contract implemented by your code**.
 No hay desviaciones respecto al contrato del starter: se reutilizó `ApiError(timestamp, status, code, message, path)` tal como fue entregado. Los códigos de error usados son `BOARD_NOT_FOUND` (404), `INVALID_REQUEST` (400, validación de DTO con Bean Validation), e `INVALID_INPUT` (400, invariante de dominio violada al construir `Board`/`BoardElement`).
 
 Nota: cuando la invariante de `BoardElement` (ej. `width`/`height` negativos) se viola dentro de la lista `elements` del body del PUT, la excepción se produce durante la deserialización de Jackson y llega como `HttpMessageNotReadableException`, no como `IllegalArgumentException` directa. Se agregó un handler específico para ese caso que desenvuelve la causa y responde con el mismo `ApiError` (`INVALID_INPUT` si la causa es de dominio, `INVALID_REQUEST` en cualquier otro caso de body malformado), para no romper el contrato uniforme de errores.
-
-Explain any deviation from this starter contract.
