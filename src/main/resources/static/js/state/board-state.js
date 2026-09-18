@@ -21,13 +21,16 @@ export function createBoardState(){
       board={...board,elements:[...board.elements,e]}; selectedId=e.id; return e;
     },
     moveSelected(x,y){
-
       board={...board,elements:board.elements.map(e=>e.id===selectedId && e.type!=='CONNECTOR'?{...e,x,y}:e)};
     },
-    beginConnect(){ if(selectedId) connectSourceId=selectedId; },
+    beginConnect(){
+      const source = board.elements.find(e => e.id === selectedId);
+      if(source && source.type !== 'CONNECTOR') connectSourceId = selectedId;
+    },
     completeConnect(targetId){
-
       if(!connectSourceId || !targetId || connectSourceId===targetId) return null;
+      const target = board.elements.find(e => e.id === targetId);
+      if(!target || target.type === 'CONNECTOR') return null;
       const e={id:uid('conn'),type:'CONNECTOR',x:0,y:0,width:0,height:0,text:'',sourceId:connectSourceId,targetId};
       board={...board,elements:[...board.elements,e]}; connectSourceId=null; selectedId=e.id; return e;
     },
