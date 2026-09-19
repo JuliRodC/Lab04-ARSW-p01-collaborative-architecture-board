@@ -1,27 +1,83 @@
+/**
+ * BoardApiClient — único módulo del cliente que habla HTTP.
+ * Ningún otro archivo debe llamar a fetch().
+ *
+ * Contrato de errores: toda falla (red, HTTP no-2xx, respuesta ilegible o
+ * validación local) se traduce a BoardApiError { status, code, message }.
+ *   status 0  -> no hubo respuesta HTTP (red caída o validación local)
+ *   code      -> el `code` que envía el backend, o un código propio del cliente
+ */
+const BASE_URL = '/api/boards';
+
 export class BoardApiError extends Error {
-  constructor(status, code, message){ super(message); this.status=status; this.code=code; }
+  constructor(status, code, message, { retryable = true } = {}) {
+    super(message);
+    this.name = 'BoardApiError';
+    this.status = status;
+    this.code = code;
+    this.retryable = retryable;
+  }
 }
 
-async function parse(response){
+function invalidInput(message) {
+  // Error de validación local: repetir la misma operación no lo arregla.
+  return new BoardApiError(0, 'INVALID_INPUT', message, { retryable: false });
+}
+
+async function request(path, options = {}) {
+  let response;
+  try {
+    response = await fetch(path, options);
+  } catch {
+    throw new BoardApiError(
+        0,
+        'NETWORK_ERROR',
+        'Could not reach the server. Check that it is running and try again.'
+    );
+  }
+
   const payload = await response.json().catch(() => null);
-  if(!response.ok){ throw new BoardApiError(response.status, payload?.code ?? 'HTTP_ERROR', payload?.message ?? `HTTP ${response.status}`); }
+
+  if (!response.ok) {
+    throw new BoardApiError(
+        response.status,
+        payload?.code ?? 'HTTP_ERROR',
+        payload?.message ?? `Request failed with HTTP ${response.status}`
+    );
+  }
+  if (payload === null) {
+    throw new BoardApiError(response.status, 'INVALID_RESPONSE', 'The server returned an unreadable response.');
+  }
   return payload;
 }
 
-export const BoardApiClient = {
-  async create(name){
-    // TODO LAB-05: keep HTTP details in this module only.
-    const response = await fetch('/api/boards',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
-    return parse(response);
+function jsonBody(method, body) {
+  return {
+    method,
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(body)
+  };
+}
+
+export const BoardApiClient = Object.freeze({
+  /** POST /api/boards */
+  create(name) {
+    return request(BASE_URL, jsonBody('POST', { name }));
   },
-  async load(id){
-    // TODO LAB-05: validate id and translate non-2xx responses consistently.
-    const response = await fetch(`/api/boards/${encodeURIComponent(id)}`);
-    return parse(response);
+
+  /** GET /api/boards/{id} */
+  load(id) {
+    const cleanId = String(id ?? '').trim();
+    if (!cleanId) return Promise.reject(invalidInput('Enter a boardId to load.'));
+    return request(`${BASE_URL}/${encodeURIComponent(cleanId)}`);
   },
-  async save(board){
-    // TODO LAB-05: PUT the complete board state; do not invent /move or /draw endpoints.
-    const response = await fetch(`/api/boards/${encodeURIComponent(board.id)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:board.name,elements:board.elements})});
-    return parse(response);
+
+  /** PUT /api/boards/{id} — reemplaza el estado completo del Board. */
+  save(board) {
+    if (!board?.id) return Promise.reject(invalidInput('Create or load a board before saving.'));
+    return request(
+        `${BASE_URL}/${encodeURIComponent(board.id)}`,
+        jsonBody('PUT', { name: board.name, elements: board.elements })
+    );
   }
-};
+});
