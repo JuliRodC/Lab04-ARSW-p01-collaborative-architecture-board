@@ -38,7 +38,7 @@ class BoardApplicationServiceTest {
         Board updated = service.replaceBoard(
                 created.id(),
                 "Board actualizado",
-                List.of(new BoardElement("e1", ElementType.RECTANGLE, 0, 0, 10, 10, ""))
+                List.of(new BoardElement("e1", ElementType.RECTANGLE, 0, 0, 10, 10, "", null, null))
         );
 
         assertEquals(created.id(), updated.id());

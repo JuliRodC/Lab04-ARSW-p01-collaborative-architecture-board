@@ -64,4 +64,12 @@ Se priorizó claridad y desacoplamiento sobre eficiencia y sofisticación.
 
 Se aceptó pagar en rendimiento y en comodidad de uso porque el objetivo de este laboratorio es una estructura comprensible y lista para evolucionar, no un editor optimizado.
 ## Evidence
-TODO LAB-05
+
+![Board cargado con dos elementos conectados](evidence/lab5-01-board-connected.png)
+
+*Board cargado con dos elementos y un conector entre ellos.*
+
+![Cambio guardado y persistente tras recargar](evidence/lab5-02-saved-reloaded.png)
+
+*Tras renombrar el board y guardar, se recarga la pagina desde cero y se vuelve a cargar por id: el nombre y el conector siguen ahi, confirmando que el PUT persiste en el backend.*
+
