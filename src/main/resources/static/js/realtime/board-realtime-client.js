@@ -1,12 +1,12 @@
+function webSocketUrl(){
+  const protocol=location.protocol==='https:'?'wss':'ws';
+  return `${protocol}://${location.host}/ws`;
+}
+
 export function createBoardRealtimeClient({onEvent=()=>{},onStatus=()=>{}}={}){
   let client=null;
   let subscription=null;
   let currentBoardId=null;
-
-  function webSocketUrl(){
-    const protocol=location.protocol==='https:'?'wss':'ws';
-    return `${protocol}://${location.host}/ws`;
-  }
 
   function connect(boardId){
     if(!boardId) return Promise.reject(new Error('boardId is required before connecting'));

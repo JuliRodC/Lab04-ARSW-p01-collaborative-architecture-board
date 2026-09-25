@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -61,7 +60,7 @@ class BoardEventContractTest {
         Board board = repository.findById(BOARD_ID).orElseThrow();
         assertEquals(1, board.elements().size());
         assertEquals("rect-1", board.elements().get(0).id());
-        verify(messagingTemplate).convertAndSend(eq("/topic/boards/" + BOARD_ID), eq(created));
+        verify(messagingTemplate).convertAndSend("/topic/boards/" + BOARD_ID, created);
     }
 
     // ---------- ELEMENT_MOVED ----------
@@ -77,7 +76,7 @@ class BoardEventContractTest {
         BoardElement element = repository.findById(BOARD_ID).orElseThrow().elements().get(0);
         assertEquals(420.0, element.x());
         assertEquals(180.0, element.y());
-        verify(messagingTemplate).convertAndSend(eq("/topic/boards/" + BOARD_ID), eq(moved));
+        verify(messagingTemplate).convertAndSend("/topic/boards/" + BOARD_ID, moved);
     }
 
     // ---------- Contrato JSON (lo que manda el navegador) ----------
@@ -140,9 +139,11 @@ class BoardEventContractTest {
 
     @Test
     void eventWithoutBoardIdCannotBeBuilt() {
+        Instant now = Instant.now();
+        BoardEventPayload payload = new BoardEventPayload(null, "rect-1", 1.0, 2.0);
+
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> new BoardEvent("e-1", null, BoardEventType.ELEMENT_MOVED, "client-abc", Instant.now(),
-                        new BoardEventPayload(null, "rect-1", 1.0, 2.0)));
+                () -> new BoardEvent("e-1", null, BoardEventType.ELEMENT_MOVED, "client-abc", now, payload));
         assertEquals("boardId is required", ex.getMessage());
     }
 
