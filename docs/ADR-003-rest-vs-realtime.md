@@ -37,3 +37,11 @@ Costos:
 
 Limitación aceptada para el alcance de este curso:
 - No se resuelven actualizaciones simultáneas sobre el mismo elemento (ej. dos personas moviendo el mismo rectángulo a la vez); eso se aborda en el Lab #7.
+
+## Trade-off
+
+| Se gana | Se paga |
+|---|---|
+| Propagación inmediata de crear/mover/conectar/eliminar a todos los navegadores suscritos a `/topic/boards/{boardId}`. | Dos canales (REST + STOMP) que el cliente debe coordinar; `board-realtime-client.js` encapsula STOMP para que `app.js` no dependa de él. |
+| El servidor aplica y valida cada evento **antes** de difundirlo (`BoardWebSocketController` → `BoardEventApplicationService`), así el Board autoritativo sigue en el servidor. | Un evento rechazado (Board inexistente, `boardId` del destino distinto al del sobre, payload incompleto, JSON inválido) solo se registra en el log; el emisor no recibe un error explícito y su vista local puede quedar desalineada hasta recargar el snapshot por REST. |
+| Contrato de evento pequeño y verificable (`BoardEventContractTest`: `ELEMENT_CREATED`, `ELEMENT_MOVED`, rechazo si falta `boardId`). | Sin número de secuencia ni versión: el camino read-modify-write no protege ediciones simultáneas (último en escribir gana). Se deja deliberadamente para el Lab #7. |

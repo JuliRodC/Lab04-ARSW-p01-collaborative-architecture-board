@@ -33,10 +33,26 @@ export function createBoardRealtimeClient({onEvent=()=>{},onStatus=()=>{}}={}){
     });
   }
 
+  // Envía un BoardEvent al servidor. Los detalles de STOMP (destino, headers,
+  // serialización) quedan encapsulados aquí; app.js solo entrega el evento.
   function publish(event){
-    // TODO LAB-06: reject if disconnected, serialize the contract and SEND to
-    // /app/boards/{boardId}/events. Keep STOMP details inside this module.
-    throw new Error('TODO LAB-06: publish BoardEvent');
+    if(!client?.connected || !currentBoardId){
+      return Promise.reject(new Error('Not connected to the live channel'));
+    }
+    if(!event?.boardId){
+      return Promise.reject(new Error('BoardEvent.boardId is required'));
+    }
+    if(event.boardId!==currentBoardId){
+      return Promise.reject(new Error(`BoardEvent belongs to ${event.boardId}, but the live channel is ${currentBoardId}`));
+    }
+    try {
+      client.send(`/app/boards/${currentBoardId}/events`,
+        {'content-type':'application/json'},
+        JSON.stringify(event));
+      return Promise.resolve(event);
+    } catch(error){
+      return Promise.reject(error instanceof Error?error:new Error(String(error)));
+    }
   }
 
   function disconnect(){

@@ -127,8 +127,12 @@ function requireBoard() {
 }
 
 function publish(event) {
-    // TODO LAB-06 (Persona B): realtime.publish(event);
-    console.info('BoardEvent ready to publish', event);
+    // Lab 06 (Persona B): el evento viaja por STOMP; el estado local ya se actualizó
+    // de forma optimista y el servidor re-difunde el evento aceptado a todos.
+    realtime.publish(event).catch((error) => {
+        console.error('BoardEvent could not be published', error);
+        refresh(`Live publish failed: ${error.message}`);
+    });
 }
 
 $('connectLiveBtn').onclick = async () => {
