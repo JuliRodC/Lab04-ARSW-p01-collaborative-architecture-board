@@ -149,8 +149,17 @@ $('disconnectLiveBtn').onclick = async () => {
 };
 
 view.on({
-    select(id) { if (inFlight) return; state.select(id); refresh(); },
-    move(id, x, y) { if (inFlight) return; state.select(id); state.moveSelected(x, y); refresh(); },
+    select(id) {
+        if (inFlight) return;
+        state.select(id);
+        refresh();
+    },
+    move(id, x, y) {
+        if (inFlight) return;
+        state.select(id);
+        state.moveSelected(x, y);
+        refresh();
+    },
     moveEnd(id, x, y) {
         const board = state.snapshot().board;
         if (board.id && realtime.isConnected()) publish(BoardEvents.elementMoved(board.id, actorId, id, x, y));
