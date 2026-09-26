@@ -44,8 +44,63 @@ export function createBoardState(){
       return removed;
     },
     applyEvent(event){
-      // TODO LAB-06 (Persona C): esto lo implementamos cuando lleguemos a esa parte.
-      throw new Error(`TODO LAB-06: apply ${event?.type ?? 'unknown'} event`);
+      if(!event || !event.type) return;
+      const payload = event.payload ?? {};
+
+      switch(event.type){
+        case 'ELEMENT_CREATED':
+        case 'CONNECTOR_CREATED': {
+          const incoming = payload.element;
+          if(!incoming) return;
+          const exists = board.elements.some(e => e.id === incoming.id);
+          board = {
+            ...board,
+            elements: exists
+                ? board.elements.map(e => e.id === incoming.id ? { ...incoming } : e)
+                : [...board.elements, { ...incoming }]
+          };
+          break;
+        }
+
+        case 'ELEMENT_MOVED': {
+          const { elementId, x, y } = payload;
+          if(!elementId) return;
+          board = {
+            ...board,
+            elements: board.elements.map(e =>
+                e.id === elementId && e.type !== 'CONNECTOR' ? { ...e, x, y } : e
+            )
+          };
+          break;
+        }
+
+        case 'ELEMENT_UPDATED': {
+          const incoming = payload.element;
+          if(!incoming) return;
+          board = {
+            ...board,
+            elements: board.elements.map(e => e.id === incoming.id ? { ...incoming } : e)
+          };
+          break;
+        }
+
+        case 'ELEMENT_DELETED': {
+          const { elementId } = payload;
+          if(!elementId) return;
+          if(selectedId === elementId) selectedId = null;
+          if(connectSourceId === elementId) connectSourceId = null;
+          board = {
+            ...board,
+            elements: board.elements.filter(e =>
+                e.id !== elementId && e.sourceId !== elementId && e.targetId !== elementId
+            )
+          };
+          break;
+        }
+
+        default:
+          console.warn('Unknown BoardEvent type', event.type);
+      }
     },
     toPersistedBoard(){ return structuredClone(board); }
   };

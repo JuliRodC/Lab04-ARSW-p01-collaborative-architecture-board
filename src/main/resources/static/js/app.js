@@ -24,8 +24,9 @@ let liveStatus = 'disconnected';
 const realtime = createBoardRealtimeClient({
     onStatus(status) { liveStatus = status; refresh(); },
     onEvent(event) {
-        // TODO LAB-06 (Persona C): state.applyEvent(event); refresh();
-        console.info('Remote BoardEvent received', event);
+        state.applyEvent(event);
+        const own = event?.actorId === actorId;
+        refresh(own ? '' : `Remote update: ${event?.type ?? 'unknown'} by ${event?.actorId}`);
     }
 });
 
