@@ -80,3 +80,14 @@ Relaciones clave:
 ## Quality rule
 
 The diagrams must describe the code that is actually delivered. Avoid decorative boxes and avoid generated diagrams containing every framework class.
+
+## Lab 06 — Real-Time Collaboration (ArchiMate Application View)
+
+Modelo editable: `lab6-application-view.archimate` (vista "Lab 06 - Real-Time Collaboration"). Imagen exportada: `lab6-application-view.png`.
+
+- **Browser (A / B):** `BoardApp (app.js)` orquesta `BoardState`, `BoardView`, `BoardApiClient` y `BoardRealtimeClient`.
+- **REST** (`/api/boards`, realizado por `BoardRestController`) se mantiene para crear, cargar y guardar el snapshot.
+- **STOMP:** `BoardRealtimeClient` publica en `/app/boards/{id}/events` (realizado por `BoardWebSocketController`) y se suscribe a `/topic/boards/{boardId}` (realizado por el Simple Broker).
+- `BoardWebSocketController` usa `BoardEventApplicationService.apply(event)`; solo el evento **aceptado** fluye al broker y de ahí a todos los navegadores.
+- Ambos servicios dependen del puerto `BoardRepository`; `InMemoryBoardRepository` lo realiza y mantiene el `Board` autoritativo.
+
